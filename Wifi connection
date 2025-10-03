@@ -1,0 +1,7 @@
+Connect to the wifi ESP32-CAR 
+password: 0123456789
+
+Open browser and type the IP address 192.168.4.1 (in any device mobile or laptop)
+
+A emulator will appear through this you can control the car
+
