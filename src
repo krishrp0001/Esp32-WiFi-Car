@@ -1,0 +1,90 @@
+//For two wheel car
+//Mobile control car
+
+#include <WiFi.h>
+#include <WebServer.h>
+
+const char* ssid = "ESP32-CAR";
+const char* password = "0123456789";
+
+WebServer server(80);
+
+// Motor pins
+#define IN1 26
+#define IN2 27
+#define IN3 14
+#define IN4 12
+
+void setup() {
+  Serial.begin(115200);
+
+  // Motor pins
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  // WiFi AP mode
+  WiFi.softAP(ssid, password);
+  Serial.print("Car IP: ");
+  Serial.println(WiFi.softAPIP());
+
+  // Web routes
+  server.on("/", []() {
+    server.send(200, "text/html",
+      "<!DOCTYPE html><html>"
+      "<head>"
+      "<style>"
+      "body { text-align: center; font-family: Arial; }"
+      "h1 { font-size: 32px; }"
+      "button { width: 150px; height: 80px; font-size: 24px; margin: 15px; border-radius: 15px; }"
+      ".grid { display: grid; grid-template-columns: 160px 160px 160px; justify-content: center; align-items: center; }"
+      ".grid div { display: flex; justify-content: center; align-items: center; }"
+      "</style>"
+      "</head><body>"
+      "<h1>ESP32 Car Control</h1>"
+      "<div class='grid'>"
+      "  <div></div> <div><a href='/fwd'><button>Forward</button></a></div> <div></div>"
+      "  <div><a href='/left'><button>Right</button></a></div>"
+      "  <div><a href='/stop'><button>Break</button></a></div>"
+      "  <div><a href='/right'><button>Left</button></a></div>"
+      "  <div></div> <div><a href='/back'><button>Back</button></a></div> <div></div>"
+      "</div>"
+      "</body></html>"
+    );
+  });
+
+  server.on("/fwd", [](){ forward(); server.sendHeader("Location", "/"); server.send(303); });
+  server.on("/back", [](){ backward(); server.sendHeader("Location", "/"); server.send(303); });
+  server.on("/left", [](){ left(); server.sendHeader("Location", "/"); server.send(303); });
+  server.on("/right", [](){ right(); server.sendHeader("Location", "/"); server.send(303); });
+  server.on("/stop", [](){ stopCar(); server.sendHeader("Location", "/"); server.send(303); });
+
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();
+}
+
+// Movement functions
+void forward() {
+  digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+}
+void backward() {
+  digitalWrite(IN1, LOW); digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW); digitalWrite(IN4, HIGH);
+}
+void left() {
+  digitalWrite(IN1, LOW); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+}
+void right() {
+  digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW); digitalWrite(IN4, LOW);
+}
+void stopCar() {
+  digitalWrite(IN1, LOW); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW); digitalWrite(IN4, LOW);
+}
